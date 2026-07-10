@@ -9,8 +9,6 @@ import { projectId } from "../composables/useRouteObserver";
 import { social } from "../content/social";
 import ButtonRound from "./ButtonRound.vue";
 import ArrowRight from "./icons/ArrowRight.vue";
-import SoundsToggle from "./SoundsToggle.vue";
-import { isFeatureEnabled } from "../utils/features";
 import { useRouter } from "../composables/useRouter";
 import { useFirstRoute } from "../composables/useFirstRoute";
 
@@ -100,14 +98,13 @@ const getInTouchClassNames = computed(() => {
         renderAs="a"
         variant="accent"
         :aria-label="t('get-in-touch')"
-        :href="social.find((item) => item.name === 'mail')?.url ?? ''"
+        :href="`mailto:${social.find((item) => item.name === 'mail')?.url.split(':')[1] ?? ''}`"
         external
         :class="getInTouchClassNames"
         data-cursor="circle-white"
         data-hoversound="hover"
         >{{ t("get-in-touch") }}</Button
       >
-      <SoundsToggle class="header-sounds-toggle" :isDarkTheme="isDarkTheme" v-if="isFeatureEnabled('sounds')" />
     </div>
   </header>
 </template>

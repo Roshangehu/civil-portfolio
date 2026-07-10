@@ -1,7 +1,12 @@
+export const contact = {
+  email: "ravirajjoshi91@gmail.com",
+  phone: "6398283036",
+  phoneDisplay: "+91 63982 83036",
+} as const;
+
 export const social = [
-  { url: "mailto:me@david-hckh.com", name: "mail" },
-  { url: "https://github.com/davidhckh", name: "github" },
-  { url: "https://www.linkedin.com/in/david-heckhoff/", name: "linkedin" },
-  { url: "https://x.com/DavidHckh", name: "x" },
-  //{ url: "https://www.instagram.com/davidhckh/", name: "instagram" },
-] as const satisfies { url: string; name: "mail" | "github" | "instagram" | "linkedin" | "x" }[];
+  { url: `mailto:${contact.email}`, name: "mail" },
+  { url: "https://www.instagram.com/mayadar_ravi?igsh=MWIzNDJ1MjdkajRyMw==", name: "instagram" },
+  { url: "https://www.facebook.com/share/1JHMM1qGZ3/", name: "facebook" },
+  { url: `tel:+91${contact.phone}`, name: "phone" },
+] as const satisfies { url: string; name: "mail" | "instagram" | "facebook" | "phone" }[];

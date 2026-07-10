@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { previews } from "../../../content/projects/previews";
 import { locale } from "../../../i18n/store";
-import PreviewCard from "../../projects/components/PreviewCard.vue";
+import ProjectCardWithCategory from "../../projects/components/ProjectCardWithCategory.vue";
+import ProjectFilter from "../../projects/components/ProjectFilter.vue";
+import ProjectLightbox from "../../projects/components/ProjectLightbox.vue";
 import NotchSection from "../../../components/NotchSection.vue";
 import Banner from "../../../components/Banner.vue";
 import { t } from "../../../i18n/utils/translate";
-import { isFeatureEnabled } from "../../../utils/features";
 
 import type { ProjectPreview } from "../../../content/types";
 
 const loadedPreviews = ref<ProjectPreview[] | null>(null);
+const activeFilter = ref("All");
+const lightboxOpen = ref(false);
+const lightboxImageIndex = ref(0);
+const selectedProject = ref<ProjectPreview | null>(null);
 
 const emit = defineEmits<{
   (e: "loaded", previews: ProjectPreview[]): void;
@@ -28,6 +33,57 @@ const loadPreviews = async () => {
 watch(locale, loadPreviews);
 
 onMounted(loadPreviews);
+
+// Get unique categories from loaded previews
+const availableCategories = computed(() => {
+  if (!loadedPreviews.value) return ["All"];
+  
+  const categories = new Set(loadedPreviews.value.map(p => p.category));
+  return ["All", ...Array.from(categories).sort()];
+});
+
+// Filter previews based on active filter
+const filteredPreviews = computed(() => {
+  if (!loadedPreviews.value) return [];
+  
+  if (activeFilter.value === "All") {
+    return loadedPreviews.value;
+  }
+  
+  return loadedPreviews.value.filter(p => p.category === activeFilter.value);
+});
+
+const handleFilterChange = (filter: string) => {
+  activeFilter.value = filter;
+};
+
+const handleImageClick = (project: ProjectPreview, imageIndex: number) => {
+  selectedProject.value = project;
+  lightboxImageIndex.value = imageIndex;
+  lightboxOpen.value = true;
+};
+
+const handleLightboxClose = () => {
+  lightboxOpen.value = false;
+  selectedProject.value = null;
+  lightboxImageIndex.value = 0;
+};
+
+const handleLightboxNext = () => {
+  if (selectedProject.value?.images && lightboxImageIndex.value < selectedProject.value.images.length - 1) {
+    lightboxImageIndex.value++;
+  }
+};
+
+const handleLightboxPrev = () => {
+  if (lightboxImageIndex.value > 0) {
+    lightboxImageIndex.value--;
+  }
+};
+
+const handleLightboxSelect = (index: number) => {
+  lightboxImageIndex.value = index;
+};
 </script>
 
 <template>
@@ -40,12 +96,40 @@ onMounted(loadPreviews);
         <h2 class="projects-title-copy">{{ t("projects") }}</h2>
       </div>
     </div>
+
+    <div class="grid">
+      <ProjectFilter
+        :active-filter="activeFilter"
+        :filters="availableCategories"
+        @filter:change="handleFilterChange"
+      />
+    </div>
+
     <div class="grid">
       <div class="projects-cards">
-        <PreviewCard v-for="preview in loadedPreviews" :key="preview.title" :preview="preview" />
-        <PreviewCard v-if="isFeatureEnabled('startProject')" />
+        <ProjectCardWithCategory
+          v-for="preview in filteredPreviews"
+          :key="preview.slug"
+          :preview="preview"
+          @image:click="(index) => handleImageClick(preview, index)"
+        />
+        <div v-if="filteredPreviews.length === 0" class="projects-empty">
+          <p>{{ t("projects") }} not found</p>
+        </div>
       </div>
     </div>
+
+    <ProjectLightbox
+      v-if="selectedProject"
+      :is-open="lightboxOpen"
+      :images="selectedProject.images || [selectedProject.thumbnail]"
+      :current-index="lightboxImageIndex"
+      :title="selectedProject.title"
+      @close="handleLightboxClose"
+      @next="handleLightboxNext"
+      @prev="handleLightboxPrev"
+      @select="handleLightboxSelect"
+    />
   </div>
 </template>
 
@@ -100,18 +184,54 @@ onMounted(loadPreviews);
       @include mixins.mq("xl") {
         font-size: var(--font-size-title-xl);
       }
+
+      margin: 0;
     }
 
     &-banner {
-      position: absolute;
-      top: 0;
-      left: -8px;
-      transform: translate(0, -20%) rotate(-4deg);
-
-      @include mixins.mq("lg") {
-        left: -16px;
-        transform: translate(0, -20%) rotate(-6deg);
+      @include mixins.mq("md") {
+        margin-bottom: var(--space-sm);
       }
+    }
+  }
+
+  &-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-md);
+    grid-column: 1 / 13;
+    width: 100%;
+    animation: fadeIn 0.4s ease-out;
+
+    @include mixins.mq("md") {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-lg);
+    }
+
+    @include mixins.mq("lg") {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xl);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  }
+
+  &-empty {
+    grid-column: 1 / 13;
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--color-text-300);
+    font-size: 18px;
+
+    p {
+      margin: 0;
     }
   }
 
@@ -131,28 +251,6 @@ onMounted(loadPreviews);
       left: 0;
       color: var(--color-beige-600);
       --icon-color: var(--color-beige-600);
-    }
-  }
-
-  &-cards {
-    max-width: 100%;
-    flex: 1;
-    grid-column: 1 / span 12;
-    display: grid;
-    gap: var(--space-lg);
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-
-    @include mixins.mq("md") {
-      grid-column: 1 / span 12;
-    }
-
-    @include mixins.mq("lg") {
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      grid-column: 3 / span 8;
-    }
-
-    @include mixins.mq("xl") {
-      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     }
   }
 }

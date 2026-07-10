@@ -26,4 +26,6 @@ export interface ProjectPreview {
   slug: string;
   thumbnail: string;
   description: string;
+  category: string;
+  images?: string[];
 }
