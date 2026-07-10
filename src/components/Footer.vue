@@ -9,11 +9,7 @@ import ButtonRound from "./ButtonRound.vue";
 import { lenis } from "../composables/useScroll";
 import ArrowRightLong from "./icons/ArrowRightLong.vue";
 
-interface Props {
-  withSocial?: boolean;
-}
-
-const { withSocial = true } = defineProps<Props>();
+const withSocial = true;
 
 const handleBackToTop = () => {
   if (!lenis.value) return;
