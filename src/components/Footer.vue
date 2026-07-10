@@ -2,7 +2,6 @@
 import Social from "./Social.vue";
 import Link from "./Link.vue";
 import Clickable from "./Clickable.vue";
-import LangSwitch from "./LangSwitch.vue";
 import NotchSection from "./NotchSection.vue";
 import { t } from "../i18n/utils/translate";
 import { locale } from "../i18n/store";
@@ -13,6 +12,8 @@ import ArrowRightLong from "./icons/ArrowRightLong.vue";
 interface Props {
   withSocial?: boolean;
 }
+
+const { withSocial = true } = defineProps<Props>();
 
 const handleBackToTop = () => {
   if (!lenis.value) return;
