@@ -74,13 +74,21 @@ const experiences = computed((): Experience[] => {
   justify-content: center;
   position: relative;
   width: 100%;
-  gap: var(--space-xl);
-  padding-left: var(--space-outer);
-  padding-right: var(--space-outer);
+  gap: var(--space-lg);
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
   background-color: var(--color-beige-500);
-  min-height: calc(var(--lvh) * 100 + var(--radius-xxl));
-  padding-top: 96px;
-  padding-bottom: 96px;
+  min-height: auto;
+  padding-top: 64px;
+  padding-bottom: 64px;
+
+  @include mixins.mq("sm") {
+    padding-left: var(--space-outer);
+    padding-right: var(--space-outer);
+    gap: var(--space-xl);
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
 
   @include mixins.mq("md") {
     padding-top: 144px;
@@ -129,10 +137,15 @@ const experiences = computed((): Experience[] => {
 
   &-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
     grid-column: 1 / 13;
     width: 100%;
+
+    @include mixins.mq("sm") {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-lg);
+    }
 
     @include mixins.mq("lg") {
       grid-column: 3 / 11;
@@ -140,39 +153,61 @@ const experiences = computed((): Experience[] => {
   }
 
   &-item {
-    padding: var(--space-lg);
+    padding: var(--space-md);
     background-color: rgba(255, 255, 255, 0.5);
     border: 2px solid var(--color-text-300);
     border-radius: var(--radius-md);
     backdrop-filter: blur(10px);
 
+    @include mixins.mq("sm") {
+      padding: var(--space-lg);
+    }
+
     &-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: var(--space-md);
-      margin-bottom: var(--space-md);
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+
+      @include mixins.mq("sm") {
+        gap: var(--space-md);
+        margin-bottom: var(--space-md);
+      }
     }
 
     &-title {
       margin: 0;
-      font-size: var(--font-size-label-md);
+      font-size: var(--font-size-text-lg);
       font-weight: 700;
       color: var(--color-text-400);
+
+      @include mixins.mq("sm") {
+        font-size: var(--font-size-label-md);
+      }
     }
 
     &-duration {
-      font-size: var(--font-size-text-sm);
+      font-size: var(--font-size-text-xs);
       font-weight: 600;
       color: var(--color-text-300);
       white-space: nowrap;
+
+      @include mixins.mq("sm") {
+        font-size: var(--font-size-text-sm);
+      }
     }
 
     &-company {
-      margin: 0 0 var(--space-md) 0;
-      font-size: var(--font-size-text-base);
+      margin: 0 0 var(--space-sm) 0;
+      font-size: var(--font-size-text-sm);
       font-weight: 600;
       color: var(--color-text-400);
+
+      @include mixins.mq("sm") {
+        margin: 0 0 var(--space-md) 0;
+        font-size: var(--font-size-text-base);
+      }
     }
 
     &-tasks {
@@ -181,13 +216,22 @@ const experiences = computed((): Experience[] => {
       margin: 0;
       display: flex;
       flex-direction: column;
-      gap: var(--space-sm);
+      gap: var(--space-xs);
+
+      @include mixins.mq("sm") {
+        gap: var(--space-sm);
+      }
 
       li {
-        font-size: var(--font-size-text-sm);
+        font-size: var(--font-size-text-xs);
         color: var(--color-text-300);
-        padding-left: var(--space-md);
+        padding-left: var(--space-sm);
         position: relative;
+
+        @include mixins.mq("sm") {
+          font-size: var(--font-size-text-sm);
+          padding-left: var(--space-md);
+        }
 
         &::before {
           content: "▸";
