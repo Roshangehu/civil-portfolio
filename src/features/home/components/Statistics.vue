@@ -15,27 +15,40 @@ interface Stat {
   color: string;
 }
 
+// Fallback labels in case a translation key is missing/empty
+const fallbackLabels: Record<string, string> = {
+  "stat-surveys": "Surveys",
+  "stat-house-plans": "House Plans",
+  "stat-demo-maps": "Demo Maps",
+  "stat-real-maps": "Real Maps",
+};
+
+function safeT(key: string): string {
+  const translated = t(key);
+  return translated && translated.trim() !== "" ? translated : fallbackLabels[key] ?? key;
+}
+
 const stats = ref<Stat[]>([
   {
-    label: t("stat-surveys"),
+    label: safeT("stat-surveys"),
     value: 30,
     suffix: "+",
     color: "var(--color-text-400)",
   },
   {
-    label: t("stat-house-plans"),
+    label: safeT("stat-house-plans"),
     value: 10,
     suffix: "+",
     color: "var(--color-text-400)",
   },
   {
-    label: t("stat-demo-maps"),
+    label: safeT("stat-demo-maps"),
     value: 40,
     suffix: "",
     color: "var(--color-text-400)",
   },
   {
-    label: t("stat-real-maps"),
+    label: safeT("stat-real-maps"),
     value: 10,
     suffix: "+",
     color: "var(--color-text-400)",
@@ -67,7 +80,7 @@ onMounted(() => {
       }
     );
   });
-  
+
   // Fallback: set widths directly if ScrollTrigger doesn't work
   setTimeout(() => {
     bars.forEach((bar, index) => {
@@ -94,13 +107,10 @@ onMounted(() => {
     <div class="grid">
       <div ref="statsRef" class="statistics-container">
         <div v-for="(stat, index) in stats" :key="index" class="stats-item">
-          <div class="stats-info">
-            <h3 class="stats-label">{{ stat.label }}</h3>
-            <p class="stats-value">{{ stat.value }}<span class="stats-suffix">{{ stat.suffix }}</span></p>
-          </div>
-          <div class="stats-bar">
-            <div class="stats-bar-fill"></div>
-          </div>
+          <p class="stats-value">
+            {{ stat.value }}<span class="stats-suffix">{{ stat.suffix }}</span>
+          </p>
+          <h3 class="stats-label">{{ stat.label }}</h3>
         </div>
       </div>
     </div>
@@ -176,18 +186,6 @@ onMounted(() => {
     }
   }
 
-  &-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-xl);
-    grid-column: 1 / 13;
-    width: 100%;
-
-    @include mixins.mq("lg") {
-      grid-column: 3 / 11;
-    }
-  }
-
   &-notch {
     &-start {
       position: absolute;
@@ -206,87 +204,72 @@ onMounted(() => {
       --icon-color: var(--color-beige-600);
     }
   }
+
+  &-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-lg);
+    grid-column: 1 / 13;
+    width: 100%;
+
+    @include mixins.mq("sm") {
+      gap: var(--space-xl);
+    }
+
+    @include mixins.mq("lg") {
+      grid-column: 3 / 11;
+    }
+  }
 }
 
 .stats-item {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  align-items: center;
+  text-align: center;
+  gap: var(--space-sm);
+  flex: 1;
+  min-width: 120px;
 
-  @include mixins.mq("md") {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-lg);
+  @include mixins.mq("sm") {
+    min-width: 140px;
+    gap: var(--space-md);
   }
 }
 
-.stats-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-sm);
-  min-width: auto;
-  width: 100%;
+.stats-value {
+  margin: 0;
+  font-size: var(--font-size-title-lg);
+  font-weight: 900;
+  color: var(--color-text-400);
+  line-height: 1;
 
-  @include mixins.mq("md") {
-    flex-direction: column;
-    align-items: flex-start;
-    min-width: 180px;
-    gap: var(--space-md);
+  @include mixins.mq("sm") {
+    font-size: var(--font-size-title-xl);
+  }
+}
+
+.stats-suffix {
+  font-size: var(--font-size-text-lg);
+  margin-left: 2px;
+
+  @include mixins.mq("sm") {
+    font-size: var(--font-size-title-lg);
   }
 }
 
 .stats-label {
   margin: 0;
-  font-size: var(--font-size-text-xs);
+  font-size: var(--font-size-text-sm);
   font-weight: 600;
   color: var(--color-text-300);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 
   @include mixins.mq("sm") {
-    font-size: var(--font-size-text-sm);
+    font-size: var(--font-size-text-base);
   }
-}
-
-.stats-value {
-  margin: 0;
-  font-size: var(--font-size-text-lg);
-  font-weight: 900;
-  color: var(--color-text-400);
-  opacity: 1 !important;
-  visibility: visible !important;
-
-  @include mixins.mq("sm") {
-    font-size: var(--font-size-title-sm);
-  }
-}
-
-.stats-suffix {
-  font-size: var(--font-size-text-base);
-  margin-left: 2px;
-}
-
-.stats-bar {
-  flex: 1;
-  height: 8px;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  position: relative;
-
-  @include mixins.mq("md") {
-    height: 6px;
-  }
-}
-
-.stats-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-text-400), var(--color-text-300));
-  border-radius: var(--radius-full);
-  width: 0%;
-  transition: width 0.3s ease;
-  opacity: 1 !important;
-  visibility: visible !important;
 }
 </style>

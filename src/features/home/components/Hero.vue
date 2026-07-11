@@ -70,6 +70,7 @@ import AppearingText from "../../../components/AppearingText.vue";
       display: flex;
       flex-direction: column;
       gap: var(--space-sm);
+      position: relative; // ✅ makes this the positioning context for the banner
 
       @include mixins.mq("md") {
         gap: var(--space-md);
@@ -109,19 +110,20 @@ import AppearingText from "../../../components/AppearingText.vue";
 
   &-banner {
     position: absolute;
-    bottom: 0;
+    top: 100%; // ✅ anchor to BELOW the title instead of overlapping it
     right: -16px;
     z-index: 10;
-    transform: rotate(-5deg) translate(0, 65%);
+    margin-top: var(--space-sm); // small breathing room from the text
+    transform: rotate(-5deg); // no more % translate covering the text
 
     @include mixins.mq("sm") {
       right: -24px;
-      transform: rotate(-5deg) translate(0, 70%);
+      margin-top: var(--space-md);
     }
 
     @include mixins.mq("lg") {
       right: -32px;
-      transform: rotate(-5deg) translate(0, 80%);
+      margin-top: var(--space-md);
     }
   }
 }
